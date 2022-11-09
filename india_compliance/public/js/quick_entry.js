@@ -158,8 +158,8 @@ class PartyQuickEntryForm extends GSTQuickEntryForm {
     }
 }
 
-frappe.ui.form.CustomerQuickEntryForm = PartyQuickEntryForm;
-frappe.ui.form.SupplierQuickEntryForm = PartyQuickEntryForm;
+//frappe.ui.form.CustomerQuickEntryForm = PartyQuickEntryForm;
+//frappe.ui.form.SupplierQuickEntryForm = PartyQuickEntryForm;
 
 class AddressQuickEntryForm extends GSTQuickEntryForm {
     async render_dialog() {
