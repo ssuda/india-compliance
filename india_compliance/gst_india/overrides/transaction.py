@@ -697,7 +697,7 @@ def is_export_without_payment_of_gst(doc):
 
 
 def validate_transaction(doc, method=None):
-    if not is_indian_registered_company(doc) or doc.get("is_opening") == "Yes":
+    if not is_indian_registered_company(doc) or doc.get("is_opening") == "Yes" or doc.flags.dont_validate_gst:
         return False
 
     if validate_items(doc) is False:
