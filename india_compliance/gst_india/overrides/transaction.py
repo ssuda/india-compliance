@@ -701,9 +701,10 @@ def validate_transaction(doc, method=None):
     if not is_indian_registered_company(doc) or doc.get("is_opening") == "Yes" or doc.flags.dont_validate_gst:
         return False
 
-    if validate_items(doc) is False:
-        # If there are no GST items, then no need to proceed further
-        return False
+    if not getattr(doc, 'is_expense', False):
+        if validate_items(doc) is False:
+            # If there are no GST items, then no need to proceed further
+            return False
 
     set_place_of_supply(doc)
     validate_mandatory_fields(doc, ("company_gstin", "place_of_supply"))
