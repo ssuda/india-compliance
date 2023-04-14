@@ -501,10 +501,14 @@ def get_gst_details(party_details, doctype, company):
 
     gst_details = frappe._dict()
 
-    party_address_field = (
-        "customer_address" if is_sales_transaction else "supplier_address"
+    # party_address_field = (
+    #     "customer_address" if is_sales_transaction else "supplier_address"
+    # )
+    gstin_fieldname = (
+        "billing_address_gstin" if is_sales_transaction else "supplier_gstin"
     )
-    if not party_details.get(party_address_field):
+
+    if not party_details.get(gstin_fieldname):
         party_gst_details = get_party_gst_details(party_details, is_sales_transaction)
         # updating party details to get correct place of supply
         party_details.update(party_gst_details)
