@@ -13,7 +13,8 @@ frappe.query_reports["HSN-wise-summary of outward supplies"] = {
 			"options": "Company",
 			"reqd": 1,
 			"default": frappe.defaults.get_user_default("Company"),
-			"on_change": fetch_gstins
+			"on_change": fetch_gstins,
+			"hidden": 1,
 		},
 		{
 			"fieldname":"gst_hsn_code",

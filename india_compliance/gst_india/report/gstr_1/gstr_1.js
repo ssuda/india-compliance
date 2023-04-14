@@ -9,7 +9,8 @@ frappe.query_reports["GSTR-1"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"reqd": 1,
-			"default": frappe.defaults.get_user_default("Company")
+			"default": frappe.defaults.get_user_default("Company"),
+			"hidden": 1,
 		},
 		{
 			"fieldname": "company_address",

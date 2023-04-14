@@ -11,6 +11,7 @@ frappe.query_reports["e-Invoice Summary"] = {
 			"fieldname": "company",
 			"label": __("Company"),
 			"default": frappe.defaults.get_user_default("Company"),
+			"hidden": 1,
 		},
 		{
 			"fieldtype": "Link",
