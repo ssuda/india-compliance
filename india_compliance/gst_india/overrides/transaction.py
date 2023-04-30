@@ -307,6 +307,9 @@ def validate_items(doc):
     has_gst_items = False
 
     for row in doc.items:
+        if not row.item_tax_template:
+            continue
+
         # Collect data to validate that non-GST items are not used with GST items
         if row.is_non_gst:
             non_gst_items.append(row.idx)
@@ -315,14 +318,14 @@ def validate_items(doc):
         has_gst_items = True
 
         # Different Item Tax Templates should not be used for the same Item Code
-        if row.item_code not in item_tax_templates:
+        if row.item_code and row.item_code not in item_tax_templates:
             item_tax_templates[row.item_code] = row.item_tax_template
             continue
 
-        if row.item_tax_template != item_tax_templates[row.item_code]:
+        if row.item_code and row.item_tax_template != item_tax_templates[row.item_code]:
             items_with_duplicate_taxes.append(bold(row.item_code))
 
-    if not has_gst_items:
+    if not has_gst_items and non_gst_items:
         validate_tax_accounts_for_non_gst(doc)
         return False
 
@@ -702,13 +705,12 @@ def is_export_without_payment_of_gst(doc):
 
 
 def validate_transaction(doc, method=None):
-    if not is_indian_registered_company(doc) or doc.get("is_opening") == "Yes" or doc.flags.dont_validate_gst:
+    if not is_indian_registered_company(doc) or doc.get("is_opening") == "Yes" or doc.flags.dont_validate_gst or getattr(doc, 'amounts_are') == 'Out of scope of Tax':
         return False
 
-    if not getattr(doc, 'is_expense', False):
-        if validate_items(doc) is False:
-            # If there are no GST items, then no need to proceed further
-            return False
+    if validate_items(doc) is False:
+        # If there are no GST items, then no need to proceed further
+        return False
 
     set_place_of_supply(doc)
     validate_mandatory_fields(doc, ("company_gstin", "place_of_supply"))
