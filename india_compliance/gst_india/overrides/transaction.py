@@ -705,7 +705,7 @@ def is_export_without_payment_of_gst(doc):
 
 
 def validate_transaction(doc, method=None):
-    if not is_indian_registered_company(doc) or doc.get("is_opening") == "Yes" or doc.flags.dont_validate_gst or getattr(doc, 'amounts_are') == 'Out of scope of Tax':
+    if not is_indian_registered_company(doc) or doc.get("is_opening") == "Yes" or doc.flags.dont_validate_gst or getattr(doc, 'amounts_are', None) == 'Out of scope of Tax':
         return False
 
     if validate_items(doc) is False:
