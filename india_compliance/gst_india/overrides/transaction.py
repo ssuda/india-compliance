@@ -502,6 +502,9 @@ def get_gst_details(party_details, doctype, company):
     if isinstance(party_details, str):
         party_details = frappe.parse_json(party_details)
 
+    if "party_name" in party_details:
+        party_details["customer" if is_sales_transaction else "supplier"] = party_details["party_name"]
+
     gst_details = frappe._dict()
 
     # party_address_field = (
