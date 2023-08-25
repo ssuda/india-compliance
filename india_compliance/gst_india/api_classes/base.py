@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import sbool
 
+from india_compliance.exceptions import GatewayTimeoutError
 from india_compliance.gst_india.utils import is_api_enabled
 from india_compliance.gst_india.utils.api import enqueue_integration_request
 
@@ -171,6 +172,13 @@ class BaseAPI:
             log.output = response_json
             enqueue_integration_request(**log)
 
+            if self.sandbox_mode and not frappe.flags.ic_sandbox_message_shown:
+                frappe.msgprint(
+                    _("GST API request was made in Sandbox Mode"),
+                    alert=True,
+                )
+                frappe.flags.ic_sandbox_message_shown = True
+
     def handle_failed_response(self, response_json):
         # Override in subclass, return truthy value to stop frappe.throw
         pass
@@ -205,6 +213,9 @@ class BaseAPI:
                 _("Your India Compliance API key is invalid"),
                 title=_("Invalid API Key"),
             )
+
+        if status_code == 504:
+            raise GatewayTimeoutError
 
     def generate_request_id(self, length=12):
         return frappe.generate_hash(length=length)

@@ -11,6 +11,10 @@ def create_sales_invoice(**data):
 
 def create_purchase_invoice(**data):
     data["doctype"] = "Purchase Invoice"
+
+    if "bill_no" not in data:
+        data["bill_no"] = frappe.generate_hash(length=5)
+
     return create_transaction(**data)
 
 
@@ -36,7 +40,7 @@ def create_transaction(**data):
         transaction.posting_date = getdate()
 
     if transaction.doctype in SALES_DOCTYPES:
-        if not transaction.customer:
+        if not transaction.get("customer") and transaction.doctype != "Quotation":
             transaction.customer = "_Test Registered Customer"
 
     else:

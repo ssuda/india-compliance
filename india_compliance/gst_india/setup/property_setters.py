@@ -24,6 +24,18 @@ def get_property_setters():
             "naming_series",
             ["PINV-.YY.-", "PRET-.YY.-", ""],
         ),
+        get_options_property_setter(
+            "Journal Entry Account",
+            "reference_type",
+            ["Bill of Entry"],
+            prepend=False,
+        ),
+        {
+            "doctype": "Purchase Invoice",
+            "fieldname": "bill_no",
+            "property": "mandatory_depends_on",
+            "value": "eval: doc.gst_category !== 'Unregistered' && gst_settings.require_supplier_invoice_no === 1 && doc.company_gstin",
+        },
         {
             "doctype": "Address",
             "fieldname": "state",
