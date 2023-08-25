@@ -269,7 +269,7 @@ audit_trail_doctypes = [
     "Purchase Receipt",
     "Stock Entry",
     "Stock Reconciliation",
-    "Subcontracting Receipt",
+    #"Subcontracting Receipt",
     # Additional ERPNext DocTypes that constitute "Books of Account"
     "POS Invoice",
     # India Compliance DocTypes that make GL Entries
