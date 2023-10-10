@@ -51,7 +51,7 @@ doc_events = {
     },
     "Company": {
         "on_trash": "india_compliance.gst_india.overrides.company.delete_gst_settings_for_company",
-        "on_update": [
+        "after_insert": [
             "india_compliance.income_tax_india.overrides.company.make_company_fixtures",
             "india_compliance.gst_india.overrides.company.create_default_tax_templates",
         ],

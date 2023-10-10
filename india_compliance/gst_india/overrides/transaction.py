@@ -1,4 +1,5 @@
 import json
+from frappe.contacts.doctype.address.address import get_address_display
 
 import frappe
 from frappe import _, bold
@@ -502,8 +503,13 @@ def get_gst_details(party_details, doctype, company):
     if isinstance(party_details, str):
         party_details = frappe.parse_json(party_details)
 
+    party = None
+    party_type = "Customer" if is_sales_transaction else "Supplier"
     if "party_name" in party_details:
-        party_details["customer" if is_sales_transaction else "supplier"] = party_details["party_name"]
+        party = party_details["party_name"]
+        party_details[party_type.lower()] = party_details["party_name"]
+    else:
+        party = party_details[party_type.lower()]
 
     gst_details = frappe._dict()
 
@@ -514,9 +520,36 @@ def get_gst_details(party_details, doctype, company):
         "billing_address_gstin" if is_sales_transaction else "supplier_gstin"
     )
 
+    if not party_details.get("address_display"):
+        if party_details.get("shipping_address"):
+            party_details.shipping_address_display = get_address_display(party_details["shipping_address"])
+        if party_details.get('shipping_address_name'):
+            party_details.shipping_address = get_address_display(party_details["shipping_address_name"])
+        if party_details.get('billing_address'):
+            party_details.billing_address_display = get_address_display(party_details["billing_address"])
+
+        party_address = party_details.get(party_type.lower() + "_address")
+        party_details.address_display = get_address_display(party_address)
+
+    party_gst_details = get_address_gstin(party_details)
+    party_details.update(party_gst_details)
+    gst_details.update(party_details)
+
     if not party_details.get(gstin_fieldname):
-        party_gst_details = get_party_gst_details(party_details, is_sales_transaction)
+        party_gst_details = get_party_gst_details(party_type, party, gstin_fieldname)
         # updating party details to get correct place of supply
+        party_details.update(party_gst_details)
+        gst_details.update(party_gst_details)
+
+    if is_sales_transaction and not party_details.get('customer_gstin'):
+        party_gst_details = get_party_gst_details(party_type, party, "customer_gstin")
+        party_details.update(party_gst_details)
+        gst_details.update(party_gst_details)
+
+    if not party_details.get('company_gstin'):
+        party_gst_details = get_party_gst_details("Company", company, "company_gstin")
+        if party_gst_details.get("gst_category"):
+            del party_gst_details["gst_category"]
         party_details.update(party_gst_details)
         gst_details.update(party_gst_details)
 
@@ -591,21 +624,49 @@ def get_gst_details(party_details, doctype, company):
     return gst_details
 
 
-def get_party_gst_details(party_details, is_sales_transaction):
-    """fetch GSTIN and GST category from party"""
+def get_address_gstin(party_details):
+    names = [party_details[key] for key in ["shipping_address_name", "shipping_address", "company_address", "customer_address"] if party_details.get(key)]
 
-    party_type = "Customer" if is_sales_transaction else "Supplier"
-    gstin_fieldname = (
-        "billing_address_gstin" if is_sales_transaction else "supplier_gstin"
+    results = frappe.db.sql(
+        """
+        select name, gstin, gst_category from `tabAddress` where name in ({})
+        """.format(", ".join(["%s"] * len(names))),
+        tuple(names),
+        as_dict=True,
     )
 
-    return frappe.db.get_value(
+    details = {}
+
+    for result in results:
+        #if result['gstin']:
+        if result['name'] == party_details.get("shipping_address_name"):
+            details['customer_gstin'] = result['gstin']
+            details['gst_category'] = result['gst_category']
+        elif result['name'] == party_details.get("shipping_address"):
+            details['company_gstin'] = result['gstin']
+        elif result['name'] == party_details.get("company_address"):
+            details['company_gstin'] = result['gstin']
+        elif result['name'] == party_details.get("customer_address"):
+            details['billing_address_gstin'] = result['gstin']
+
+    return details
+
+
+
+def get_party_gst_details(party_type, party, gstin_fieldname):
+    """fetch GSTIN and GST category from party"""
+
+    result = frappe.db.get_value(
         party_type,
-        party_details[party_type.lower()],
+        party,
         ("gst_category", f"gstin as {gstin_fieldname}"),
         as_dict=True,
     )
 
+    if not result: #or not result[gstin_fieldname]:
+        return {}
+
+    return result
 
 def get_tax_template_based_on_category(master_doctype, company, party_details):
     if not party_details.tax_category:

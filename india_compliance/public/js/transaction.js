@@ -22,12 +22,15 @@ function fetch_gst_details(doctype) {
     // we are using address below to prevent multiple event triggers
     if (in_list(frappe.boot.sales_doctypes, doctype)) {
         event_fields.push(
+            "shipping_address_name",
+            "company_address",
             "customer_address",
             "is_export_with_gst",
             "is_reverse_charge"
         );
+
     } else {
-        event_fields.push("supplier_address");
+        event_fields.push("supplier_address", "shipping_address");
     }
 
     const events = Object.fromEntries(
@@ -37,8 +40,21 @@ function fetch_gst_details(doctype) {
     frappe.ui.form.on(doctype, events);
 }
 
-async function update_gst_details(frm) {
+async function update_gst_details(frm, dt, dn, fieldname) {
     if (frm.__gst_update_triggered || frm.updating_party_details || !frm.doc.company) return;
+
+    switch (fieldname) {
+        case 'shipping_address_name':
+            frm.set_value("customer_gstin", '');
+            break
+        case 'customer_address':
+            frm.set_value("billing_address_gstin", '');
+            break
+        case 'shipping_address':
+        case 'company_address':
+            frm.set_value("company_gstin", '');
+            break
+    }
 
     const party_type = ic.get_party_type(frm.doc.doctype).toLowerCase();
     if (!frm.doc[party_type]) return;
@@ -51,13 +67,15 @@ async function update_gst_details(frm) {
 
     if (in_list(frappe.boot.sales_doctypes, frm.doc.doctype)) {
         party_fields.push(
+            "shipping_address_name",
+            "company_address",
             "customer_address",
             "billing_address_gstin",
             "is_export_with_gst",
             "is_reverse_charge"
         );
     } else {
-        party_fields.push("supplier_address", "supplier_gstin");
+        party_fields.push("supplier_address", "supplier_gstin", "shipping_address");
     }
 
     const party_details = Object.fromEntries(
