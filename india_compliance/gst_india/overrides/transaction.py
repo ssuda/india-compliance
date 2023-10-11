@@ -626,7 +626,8 @@ def get_gst_details(party_details, doctype, company):
 
 def get_address_gstin(party_details):
     names = [party_details[key] for key in ["shipping_address_name", "shipping_address", "company_address", "customer_address"] if party_details.get(key)]
-
+    if not names:
+        return {}
     results = frappe.db.sql(
         """
         select name, gstin, gst_category from `tabAddress` where name in ({})
