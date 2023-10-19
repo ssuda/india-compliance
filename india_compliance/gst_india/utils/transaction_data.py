@@ -36,8 +36,8 @@ class GSTTransactionData:
 
     def set_transaction_details(self):
         rounding_adjustment = self.rounded(self.doc.rounding_adjustment)
-        if self.doc.is_return:
-            rounding_adjustment = -rounding_adjustment
+        # if self.doc.is_return:
+        #     rounding_adjustment = -rounding_adjustment
 
         grand_total_fieldname = (
             "base_grand_total"
