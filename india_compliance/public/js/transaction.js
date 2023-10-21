@@ -25,7 +25,6 @@ function fetch_gst_details(doctype) {
             "shipping_address_name",
             "company_address",
             "customer_address",
-            "is_export_with_gst",
             "is_reverse_charge"
         );
 

@@ -555,6 +555,8 @@ def get_gst_details(party_details, doctype, company):
 
     gst_details.place_of_supply = get_place_of_supply(party_details, doctype)
 
+    party_details["is_export_with_gst"] = party_details.export_type != "Without Payment of Tax"
+
     if is_sales_transaction:
         source_gstin = party_details.company_gstin
         destination_gstin = party_details.billing_address_gstin
