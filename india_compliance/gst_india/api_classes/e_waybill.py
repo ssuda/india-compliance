@@ -12,9 +12,9 @@ class EWaybillAPI(BaseAPI):
     BASE_PATH = "ewb/ewayapi"
     SENSITIVE_HEADERS = BaseAPI.SENSITIVE_HEADERS + ("password",)
 
-    def setup(self, doc=None, *, company_gstin=None):
-        if not self.settings.enable_e_waybill:
-            frappe.throw(_("Please enable e-Waybill features in GST Settings first"))
+    def setup(self, doc=None, *, company_gstin=None, username=None, password=None):
+        # if not self.settings.enable_e_waybill:
+        #     frappe.throw(_("Please enable e-Waybill features in GST Settings first"))
 
         if doc:
             company_gstin = doc.company_gstin
@@ -22,6 +22,9 @@ class EWaybillAPI(BaseAPI):
                 reference_doctype=doc.doctype,
                 reference_name=doc.name,
             )
+
+        self.username = username
+        self.password = password
 
         if self.sandbox_mode:
             company_gstin = "05AAACG2115R1ZN"
@@ -31,7 +34,7 @@ class EWaybillAPI(BaseAPI):
         elif not company_gstin:
             frappe.throw(_("Company GSTIN is required to use the e-Waybill API"))
 
-        else:
+        elif not self.username:
             self.fetch_credentials(company_gstin, "e-Waybill / e-Invoice")
 
         self.default_headers.update(

@@ -12,9 +12,9 @@ class EInvoiceAPI(BaseAPI):
     BASE_PATH = "ei/api"
     SENSITIVE_HEADERS = BaseAPI.SENSITIVE_HEADERS + ("password",)
 
-    def setup(self, doc=None, *, company_gstin=None):
-        if not self.settings.enable_e_invoice:
-            frappe.throw(_("Please enable e-Invoicing in GST Settings first"))
+    def setup(self, doc=None, *, company_gstin=None, username=None, password=None):
+        # if not self.settings.enable_e_invoice:
+        #     frappe.throw(_("Please enable e-Invoicing in GST Settings first"))
 
         if doc:
             company_gstin = doc.company_gstin
@@ -23,15 +23,18 @@ class EInvoiceAPI(BaseAPI):
                 reference_name=doc.name,
             )
 
+        self.username = username
+        self.password = password
+
         if self.sandbox_mode:
-            company_gstin = "01AMBPG7773M002"
-            self.username = "adqgspjkusr1"
+            company_gstin = "02AMBPG7773M002"
+            self.username = "adqgsphpusr1"
             self.password = "Gsp@1234"
 
         elif not company_gstin:
             frappe.throw(_("Company GSTIN is required to use the e-Invoice API"))
 
-        else:
+        elif not self.username:
             self.fetch_credentials(company_gstin, "e-Waybill / e-Invoice")
 
         self.default_headers.update(
@@ -41,6 +44,8 @@ class EInvoiceAPI(BaseAPI):
                 "password": self.password,
             }
         )
+        print('username', self.username, self.password, company_gstin)
+
 
     def handle_failed_response(self, response_json):
         # Don't fail in case of Duplicate IRN

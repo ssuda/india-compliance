@@ -19,14 +19,16 @@ class BaseAPI:
 
     def __init__(self, *args, **kwargs):
         self.settings = frappe.get_cached_doc("GST Settings")
-        if not is_api_enabled(self.settings):
-            frappe.throw(
-                _("Please enable API in GST Settings to use the {0} API").format(
-                    self.API_NAME
-                )
-            )
+        # if not is_api_enabled(self.settings):
+        #     frappe.throw(
+        #         _("Please enable API in GST Settings to use the {0} API").format(
+        #             self.API_NAME
+        #         )
+        #     )
 
-        self.sandbox_mode = self.settings.sandbox_mode
+        self.sandbox_mode = kwargs.get('sandbox_mode') or self.settings.sandbox_mode
+        del kwargs['sandbox_mode']
+
         self.default_headers = {
             "x-api-key": (
                 (self.settings.api_secret and self.settings.get_password("api_secret"))
