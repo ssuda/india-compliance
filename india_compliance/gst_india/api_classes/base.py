@@ -27,7 +27,8 @@ class BaseAPI:
         #     )
 
         self.sandbox_mode = kwargs.get('sandbox_mode') or self.settings.sandbox_mode
-        del kwargs['sandbox_mode']
+        if  'sandbox_mode' in kwargs:
+            del kwargs['sandbox_mode']
 
         self.default_headers = {
             "x-api-key": (
