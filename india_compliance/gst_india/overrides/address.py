@@ -10,7 +10,7 @@ def validate(doc, method=None):
         doc.gstin = validate_gstin(doc.gstin)
         validate_gst_category(doc.gst_category, doc.gstin)
         validate_overseas_gst_category(doc)
-        validate_state(doc)
+    validate_state(doc)
 
 
 def validate_overseas_gst_category(doc):
